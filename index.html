@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>일하는 나, 어떤 캐릭터일까?</title>
+<style>
+:root{color-scheme:dark;font:16px system-ui,sans-serif;color:#f7f1ff;background:#1a122a}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at top,#422669,#1a122a 65%);padding:clamp(20px,6vw,64px) 16px}
+main{max-width:670px;margin:auto;padding:clamp(22px,5vw,48px);background:#251938;border:1px solid #644986;border-radius:28px;box-shadow:0 20px 65px #10091a80}
+h1{font-size:clamp(28px,6vw,48px);line-height:1.18;margin:16px 0}h2{line-height:1.4}p{line-height:1.65;color:#e2d6ef}.meta{color:#d7b8ff;font-weight:650}button{font:inherit;color:inherit;cursor:pointer;border:1px solid #755a94;border-radius:14px;padding:13px 17px;background:#382750;text-align:left}button:hover,button[aria-pressed=true]{background:#51366f;border-color:#c5a3f7}button:focus-visible,h1:focus-visible,h2:focus-visible{outline:2px solid #e9ccff;outline-offset:4px}.primary{background:#d9baff;color:#251339;font-weight:750}.primary:hover{background:#ebd8ff}.grid,.options,.actions{display:grid;gap:10px;margin:24px 0}.grid{grid-template-columns:repeat(3,1fr)}.tile{border:1px solid #634b80;border-top:3px solid var(--accent);border-radius:12px;text-align:center;padding:12px 4px}.tile span{display:block;font-size:24px;margin-bottom:5px}.actions{display:flex;flex-wrap:wrap;margin-bottom:0}progress{width:100%;accent-color:#d9baff}small{display:block;margin-top:16px}.result{border-left:4px solid var(--accent);padding-left:15px}section{animation:enter .23s ease-out}@keyframes enter{from{opacity:.3;transform:translateY(5px)}to{opacity:1;transform:none}}@media(prefers-reduced-motion:reduce){section{animation:none}}
+</style>
+<main id="app"></main>
+<script>
+const types=[
+ ['🧭','개척자형','#ffd078','새로운 가능성을 발견하는 도전가','작게 실험해 가능성을 빠르게 알아봐요.','실험 전에 성공 기준과 중단 조건을 한 줄씩 적어 보세요.'],
+ ['🔍','장인형','#b9e3ff','결과의 완성도를 높이는 전문가','놓치기 쉬운 차이를 발견해 결과를 다듬어요.','공들일 부분과 이번에 충분한 수준을 미리 나눠 보세요.'],
+ ['🧯','해결사형','#ffabac','문제를 발견하고 해결하는 행동가','막힌 상황에서 당장 할 수 있는 일을 찾아요.','급한 불을 끈 뒤 같은 일이 반복된 이유를 한 가지 살펴보세요.'],
+ ['🤝','연결자형','#aeeaca','동료와 함께 성과를 만드는 협업가','서로 다른 사람의 관점을 모아 다음 행동을 이끌어요.','대화가 끝날 때 누가 무엇을 할지 함께 한 줄로 정리해 보세요.'],
+ ['♟️','전략가형','#dbc0ff','업무의 목적과 방향을 생각하는 설계자','목표와 영향도를 짚어 힘을 쓸 곳을 정해요.','큰 방향을 정한 뒤 오늘 바로 할 수 있는 일을 하나 골라 보세요.'],
+ ['🛡️','안정가형','#f8d2ab','일관성과 신뢰를 만들어가는 실무가','일정과 약속을 관리해 동료가 믿고 맡길 수 있게 해요.','익숙한 절차에서 작은 변화 하나를 골라 시험해 보세요.']
+];
+const questions=[
+ ['오늘 안에 새 업무를 맡아 달라는 메시지가 왔어요. 첫 행동은?',
+  [[4,5,'이 일로 어떤 결정을 하려는지, 마감은 언제인지 먼저 물어본다.'],[0,2,'일단 10분짜리 초안을 만들어 대화할 재료를 준비한다.'],[5,4,'오늘 일정표를 열고 무엇을 미뤄야 할지 확인한다.'],[3,1,'비슷한 일을 해본 동료에게 자료와 팁을 부탁한다.']]],
+ ['매주 같은 표에 숫자를 세 번씩 붙여 넣고 있어요.',
+  [[1,5,'어디서 실수가 나는지 표시하고 검증 방법부터 정리한다.'],[3,4,'함께 만드는 동료에게 어느 단계가 제일 번거로운지 물어본다.'],[2,5,'두 번 입력하는 칸을 하나 찾아 이번 주부터 줄인다.'],[0,1,'복사본에 자동화 아이디어를 적용해 걸리는 시간을 재본다.']]],
+ ['동료가 “이거 어디부터 해야 할지 모르겠어요”라고 해요.',
+  [[3,2,'잠깐 옆에 앉아서 어디서 막혔는지 함께 짚어 본다.'],[5,3,'내 일정을 보고 오늘 도울 수 있는 시간을 약속한다.'],[1,5,'참고할 만한 예시와 자주 틀리는 부분을 정리해 건넨다.'],[4,0,'최종 결과가 뭔지 함께 정리하고 첫 단계를 골라 본다.']]],
+ ['제출은 했는데 반응이 예상보다 미지근했어요.',
+  [[2,1,'바로 손볼 수 있는 부분을 골라 수정안을 제안한다.'],[4,3,'처음 기대했던 결과가 무엇이었는지 다시 확인한다.'],[0,4,'다른 구성으로 짧은 시안을 만들어 반응을 비교한다.'],[1,5,'빠뜨린 기준을 찾아 다음 작업의 체크리스트에 반영한다.']]],
+ ['다들 알고 있지만 담당자가 없는 문제를 발견했어요.',
+  [[5,3,'기존 담당 범위와 보고 경로를 확인해 기록을 남긴다.'],[2,0,'피해가 더 커지기 전에 할 수 있는 조치부터 한다.'],[4,2,'얼마나 자주 생기고 누가 영향받는지 정리한다.'],[3,5,'관련자에게 같은 사례가 있었는지 묻고 담당을 함께 정한다.']]],
+ ['팀에 새 도구가 도입됐어요. 어떻게 익숙해지나요?',
+  [[0,2,'작은 업무 하나를 새 도구로 옮겨 직접 써 본다.'],[1,4,'기존 방식과 결과를 비교해 어디에 쓸 만한지 본다.'],[3,0,'먼저 써 본 동료와 화면을 보며 팁을 교환한다.'],[5,1,'자주 쓰는 기능부터 익히고 기존 자료를 옮길 순서를 정한다.']]],
+ ['협업 부서와 우선순위가 갈려 회의가 길어지고 있어요.',
+  [[4,3,'두 부서가 함께 달성하려는 목표를 다시 말해 본다.'],[1,5,'각 안의 일정, 품질, 필요한 작업을 표로 정리한다.'],[3,4,'각 부서가 꼭 지켜야 한다고 보는 조건부터 돌아가며 듣는다.'],[0,2,'공통으로 가능한 범위를 먼저 작게 시험해 보자고 한다.']]],
+ ['최종 발표 직전, 준비한 자료가 열리지 않아요.',
+  [[5,2,'백업 파일과 대체 경로부터 확인한다.'],[0,3,'핵심 내용을 구두로 설명하고 자료는 나중에 공유하자고 제안한다.'],[2,1,'다른 기기에서 파일을 열어보고 필요한 부분부터 복구한다.'],[3,4,'한 명은 진행을 맡고 다른 한 명은 복구하도록 역할을 나눈다.']]]
+];
+const app=document.querySelector('#app');
+let index=0, answers=[];
+function show(markup){
+ app.innerHTML='<section>'+markup+'</section>';
+ const heading=app.querySelector('h1,h2');
+ heading.setAttribute('tabindex','-1');
+ heading.focus();
+}
+function intro(){
+ answers=[];index=0;
+ show('<div class="meta">Be Professional 워크숍</div><h1>일하는 나, 어떤 캐릭터일까?</h1><p>일상 속 업무 상황으로 알아보는 나의 숨겨진 업무 스타일</p><div class="grid">'+types.map(([icon,name,color])=>'<div class="tile" style="--accent:'+color+'"><span>'+icon+'</span>'+name+'</div>').join('')+'</div><p>같은 업무, 같은 상황에서도 우리는 서로 다른 방식으로 일합니다. 평소 나의 모습과 가장 가까운 답변을 선택해 주세요.</p><p>정답은 없습니다. 이상적인 모습보다 실제 나의 모습에 가까운 답변을 선택해 주세요.</p><p class="meta">8문항 · 약 3분</p><button class="primary" id="start">테스트 시작하기</button>');
+ app.querySelector('#start').onclick=question;
+}
+function question(){
+ const [title,options]=questions[index];
+ show('<div class="meta">'+(index+1)+' / '+questions.length+'</div><progress aria-label="현재 문항" max="8" value="'+(index+1)+'"></progress><h2>'+title+'</h2><div class="options">'+options.map(([, ,label],i)=>'<button data-option="'+i+'" aria-pressed="'+(answers[index]===i)+'">'+label+'</button>').join('')+'</div>'+(index?'<button id="back">← 이전 문항</button>':''));
+ for(const button of app.querySelectorAll('[data-option]')) button.onclick=()=>{
+   answers[index]=Number(button.dataset.option);
+   index++;
+   if(index===questions.length) analyze(); else question();
+ };
+ const back=app.querySelector('#back');
+ if(back) back.onclick=()=>{index--;question();};
+}
+function analyze(){
+ show('<h2>업무 캐릭터 분석 중</h2><progress aria-label="분석 중"></progress><p role="status">당신의 업무 스타일을 분석하고 있어요.</p>');
+ const status=app.querySelector('[role=status]');
+ setTimeout(()=>status.textContent='숨겨진 Professional DNA를 탐색 중입니다.',500);
+ setTimeout(()=>status.textContent='당신의 업무 캐릭터가 곧 공개됩니다!',1000);
+ setTimeout(result,1500);
+}
+function result(){
+ const scores=types.map(()=>0), primary=types.map(()=>0);
+ answers.forEach((answer,i)=>{
+   const [a,b]=questions[i][1][answer];
+   scores[a]+=2;scores[b]++;primary[a]++;
+ });
+ const order=types.map((_,i)=>i).sort((a,b)=>scores[b]-scores[a]||primary[b]-primary[a]);
+ const [icon,name,color,tag,strength,tip]=types[order[0]];
+ show('<div class="meta">나의 업무 캐릭터</div><h1>'+icon+' '+name+'</h1><div class="result" style="--accent:'+color+'"><p>'+tag+'</p><p>'+strength+'</p></div><h2>다음 업무에서 해볼 작은 실천</h2><p>'+tip+'</p><details><summary>여섯 가지 업무 성향 점수 보기</summary>'+order.map(i=>'<p>'+types[i][1]+' · '+scores[i]+'점</p>').join('')+'</details><h2>Be Professional 함께 이야기하기</h2><p>내 강점이 동료에게 도움이 됐던 순간은 언제였나요? 서로 다른 강점을 써서 팀의 일하는 방식을 바꿀 수 있는 작은 약속을 하나 골라 보세요.</p><div class="actions"><button class="primary" id="again">테스트 다시 하기</button></div>');
+ app.querySelector('#again').onclick=intro;
+}
+intro();
+</script></html>
